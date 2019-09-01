@@ -123,13 +123,13 @@ var salita = function salita(dir, options, callback) {
     var onlyChanged = !!options['only-changed'];
     var depLookups = [];
     var depPromises = [];
-    forEach(deps, function (title, key) {
+    forEach(deps, function (value, key) {
       if (options.sections.indexOf(value.section) > -1) {
         var depLookup = Promise.all(dependenciesLookup(pkg.data, key, options['ignore-stars'], options['ignore-pegged']));
         depLookups.push(depLookup);
         var create = options.json
           ? createResultJSON(key, onlyChanged)
-          : createResultTable(title, onlyChanged);
+          : createResultTable(value.title, onlyChanged);
         depPromises.push(depLookup.then(create));
       }
     });
