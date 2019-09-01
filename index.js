@@ -32,15 +32,17 @@ var getTable = function () {
   });
 };
 
-var createResultJSON = function (key) {
+var createResultJSON = function (key, onlyChanged) {
   return function (results) {
     var obj = {};
-    obj[key] = results;
+    obj[key] = results.filter(function (result) {
+      return !onlyChanged || result.isChanged;
+    });
     return obj;
   };
 };
 
-var createResultTable = function (caption) {
+var createResultTable = function (caption, onlyChanged) {
   return function (results) {
     var table = getTable();
     if (results.length > 0) {
@@ -54,7 +56,8 @@ var createResultTable = function (caption) {
             'to',
             chalk.yellow(result.after)
           ];
-        } else if (result.error) {
+        }
+        if (result.error) {
           return [
             chalk.red('Package not found: '),
             result.name,
@@ -62,7 +65,8 @@ var createResultTable = function (caption) {
             chalk.yellow(result.before),
             chalk.bold.red('?')
           ];
-        } else if (!result.isUpdateable && !result.isStar && !result.isPegged) {
+        }
+        if (!result.isUpdateable && !result.isStar && !result.isPegged) {
           return [
             chalk.red('Requested range not satisfied by: '),
             result.name,
@@ -71,15 +75,17 @@ var createResultTable = function (caption) {
             'to',
             chalk.yellow(result.after)
           ];
-        } else {
-          return [
-            chalk.blue('Kept: '),
-            result.name,
-            'at',
-            chalk.yellow(result.before)
-          ];
         }
-      });
+        if (onlyChanged) {
+          return null;
+        }
+        return [
+          chalk.blue('Kept: '),
+          result.name,
+          'at',
+          chalk.yellow(result.before)
+        ];
+      }).filter(Boolean);
       table.push.apply(table, tableRows);
       var sortByName = function (a, b) {
         return a[1].localeCompare(b[1]);
@@ -114,13 +120,17 @@ var salita = function salita(dir, options, callback) {
       console.log('Found package.json.');
     }
 
+    var onlyChanged = !!options['only-changed'];
     var depLookups = [];
     var depPromises = [];
-    forEach(deps, function (value, key) {
+    forEach(deps, function (title, key) {
       if (options.sections.indexOf(value.section) > -1) {
         var depLookup = Promise.all(dependenciesLookup(pkg.data, key, options['ignore-stars'], options['ignore-pegged']));
         depLookups.push(depLookup);
-        depPromises.push(depLookup.then(options.json ? createResultJSON(key) : createResultTable(value.title)));
+        var create = options.json
+          ? createResultJSON(key, onlyChanged)
+          : createResultTable(title, onlyChanged);
+        depPromises.push(depLookup.then(create));
       }
     });
 
@@ -160,6 +170,22 @@ forEach(deps, function (value) {
   salita.sections.push(value.section);
 });
 
+function isVersionPegged(version) {
+  try {
+    var range = semver.Range(version);
+    return range.set.every(function (comparators) {
+      return comparators.length === 1 && String(comparators[0].operator || '') === '';
+    });
+  } catch (err) {
+    /*
+     * semver.Range doesn't support all version specifications (like git
+     * references), so if it raises an error, assume the dep can be left
+     * untouched:
+     */
+    return true;
+  }
+}
+
 /**
  * createDependenciesLookup
  *
@@ -193,11 +219,7 @@ function dependenciesLookup(pkg, type, ignoreStars, ignorePegged) {
         return addUntouched(name, version, { isStar: true });
       }
 
-      var range = semver.Range(version);
-      var isPegged = range.set.every(function (comparators) {
-        return comparators.length === 1 && String(comparators[0].operator || '') === '';
-      });
-      if (ignorePegged && isPegged) {
+      if (ignorePegged && isVersionPegged(version)) {
         return addUntouched(name, version, { isPegged: true });
       }
       return true;
@@ -265,8 +287,7 @@ function loadNPM() {
  * @param {Function} callback - A function to call with the dist tags.
  */
 function lookupDistTags(name, callback) {
-  // Need to require here, because NPM does all sorts of funky global
-  // attaching.
+  // Need to require here, because NPM does all sorts of funky global attaching.
   var view = require('npm/lib/view');
   var prefix = npm.config.get('save-prefix');
 
