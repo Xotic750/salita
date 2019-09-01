@@ -101,6 +101,12 @@ var createResultTable = function (caption, onlyChanged) {
   };
 };
 
+var deps = {
+  dependencies: { section: 'dep', title: 'Dependencies' },
+  devDependencies: { section: 'dev', title: 'Development Dependencies' },
+  peerDependencies: { section: 'peer', title: 'Peer Dependencies' }
+};
+
 /**
  * The main entry point.
  */
@@ -115,22 +121,17 @@ var salita = function salita(dir, options, callback) {
     }
 
     var onlyChanged = !!options['only-changed'];
-
-    var deps = {
-      dependencies: 'Dependencies',
-      devDependencies: 'Development Dependencies',
-      peerDependencies: 'Peer Dependencies'
-    };
-
     var depLookups = [];
     var depPromises = [];
     forEach(deps, function (title, key) {
-      var depLookup = Promise.all(dependenciesLookup(pkg.data, key, options['ignore-stars'], options['ignore-pegged']));
-      depLookups.push(depLookup);
-      var create = options.json
-        ? createResultJSON(key, onlyChanged)
-        : createResultTable(title, onlyChanged);
-      depPromises.push(depLookup.then(create));
+      if (options.sections.indexOf(value.section) > -1) {
+        var depLookup = Promise.all(dependenciesLookup(pkg.data, key, options['ignore-stars'], options['ignore-pegged']));
+        depLookups.push(depLookup);
+        var create = options.json
+          ? createResultJSON(key, onlyChanged)
+          : createResultTable(title, onlyChanged);
+        depPromises.push(depLookup.then(create));
+      }
     });
 
     // Wait for all of them to resolve.
@@ -163,6 +164,11 @@ var salita = function salita(dir, options, callback) {
     });
   }).done();
 };
+
+salita.sections = [];
+forEach(deps, function (value) {
+  salita.sections.push(value.section);
+});
 
 function isVersionPegged(version) {
   try {
