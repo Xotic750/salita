@@ -1,3 +1,5 @@
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -16,15 +18,13 @@ var path = require('path');
 
 var npm = require('npm');
 
-var jsonFile = require('json-file-plus');
+var jsonFilePlus = require('json-file-plus');
 
 var Table = require('cli-table');
 
 var chalk = require('chalk');
 
 var semver = require('semver');
-
-var promiseback = require('promiseback');
 
 var deps = {
   dependencies: {
@@ -161,12 +161,12 @@ var createResultTable = function createResultTable(caption, onlyChanged) {
   };
 };
 /**
- * @param {object} pkg - The package.json object.
+ * @param {object} packagePlus - The packagePlus object.
  * @returns {Promise<object>} The package.json object.
  */
 
 
-var loadNPM = function loadNPM(pkg) {
+var loadNPM = function loadNPM(packagePlus) {
   return new Promise(function executee(resolve, reject) {
     npm.load({}, function callback(err, result) {
       if (err) {
@@ -176,7 +176,7 @@ var loadNPM = function loadNPM(pkg) {
       }
     });
   }).then(function thenee() {
-    return pkg;
+    return packagePlus;
   });
 };
 /**
@@ -202,34 +202,46 @@ var isVersionPegged = function isVersionPegged(version) {
   }
 };
 /**
+ * @param {Array} latest - The latest result array.
+ * @returns {Array} The latest result array.
+ */
+
+
+var assertLatestLength = function assertLatestLength(latest) {
+  if (latest.length !== 1) {
+    throw new Error("expected 1 version key, got: ".concat(latest));
+  }
+
+  return latest;
+};
+/**
  * Given a package name, lookup the semantic tags.
  *
  * @param {string} name - The module name.
- * @param {Function} callback - A function to call with the dist tags.
+ * @param {function(Error, {prefix: (undefined|string), tags: (undefined|object)}): *} callback - A function to call with the dist tags.
  */
 
 
 var lookupDistTags = function lookupDistTags(name, callback) {
-  // Need to require here, because NPM does all sorts of funky global attaching.
+  /*  Need to require here, because NPM does all sorts of funky global attaching. */
 
   /* eslint-disable-next-line global-require */
   var view = require('npm/lib/view');
 
-  var prefix = npm.config.get('save-prefix'); // Call View directly to ensure the arguments actually work.
+  var prefix = npm.config.get('save-prefix');
+  /* Call View directly to ensure the arguments actually work. */
 
   view([name, 'dist-tags'], true, function cb(err, desc) {
     if (err) {
-      return callback(err);
+      callback(err, {});
+    } else {
+      var latest = assertLatestLength(Object.keys(desc));
+      var tags = desc[latest]['dist-tags'];
+      callback(null, {
+        prefix: prefix,
+        tags: tags
+      });
     }
-
-    var latest = Object.keys(desc);
-
-    if (latest.length !== 1) {
-      throw new Error("expected 1 version key, got: ".concat(latest));
-    }
-
-    var tags = desc[latest]['dist-tags'];
-    return callback(null, prefix, tags);
   });
 };
 /**
@@ -345,6 +357,94 @@ var getNamesAndUntouched = function getNamesAndUntouched(section, _ref4) {
   };
 };
 /**
+ * @param {object} section - A section object.
+ * @returns {boolean} Is it a populated section object.
+ */
+
+
+var isSection = function isSection(section) {
+  return _typeof(section) === 'object' && Boolean(section) && Object.keys(section).length > 0;
+};
+/**
+ * @param {{version: *, isUpdatable: boolean, existing: string, updated: string}} params - Parameters to check.
+ * @returns {boolean} - Has the version changed.
+ */
+
+
+var isVersionChanged = function isVersionChanged(_ref5) {
+  var version = _ref5.version,
+      isUpdatable = _ref5.isUpdatable,
+      existing = _ref5.existing,
+      updated = _ref5.updated;
+  return version !== null && isUpdatable && existing !== updated;
+};
+/**
+ * @param {{section: object, name: string, data: object, existing: string}} params - The parameters.
+ * @returns {{isUpdatable: boolean, before: string, isChanged: boolean, name: string, after: string}} The result.
+ */
+
+
+var updateDescriptorAndGetResult = function updateDescriptorAndGetResult(_ref6) {
+  var section = _ref6.section,
+      name = _ref6.name,
+      data = _ref6.data,
+      existing = _ref6.existing;
+  var version = data.tags.latest;
+  var isUpdatable = getIsUpdatable(existing, version);
+  var updated = data.prefix + version;
+  var isChanged = isVersionChanged({
+    version: version,
+    isUpdatable: isUpdatable,
+    existing: existing,
+    updated: updated
+  });
+
+  if (isChanged) {
+    /* Actually write to the package descriptor. */
+    section[name] = updated;
+  }
+
+  return {
+    after: updated,
+    before: existing,
+    isChanged: isChanged,
+    isUpdatable: isUpdatable,
+    name: name
+  };
+};
+/**
+ * @param {{resolve: Function, section: object, name: string}} params - The parameters.
+ * @returns {function(Error, {prefix: (undefined|string), tags: (undefined|object)})} The callback function.
+ */
+
+
+var createLookupDistTagsCallback = function createLookupDistTagsCallback(_ref7) {
+  var resolve = _ref7.resolve,
+      section = _ref7.section,
+      name = _ref7.name;
+  return function lookupDistTagsCallback(error, data) {
+    var existing = section[name];
+
+    if (error) {
+      resolve({
+        after: existing,
+        before: existing,
+        error: error,
+        isChanged: false,
+        isUpdatable: false,
+        name: name
+      });
+    } else {
+      resolve(updateDescriptorAndGetResult({
+        section: section,
+        name: name,
+        data: data,
+        existing: existing
+      }));
+    }
+  };
+};
+/**
  * CreateDependenciesLookup.
  *
  * @param {object} section - The package.json section object.
@@ -354,10 +454,11 @@ var getNamesAndUntouched = function getNamesAndUntouched(section, _ref4) {
 
 
 var dependenciesLookup = function dependenciesLookup(section, ignore) {
-  // See if any dependencies of this type exist.
-  if (!section || !Object.keys(section).length) {
+  /* See if any dependencies of this type exist. */
+  if (isSection(section) === false) {
     return [];
-  } // Loop through and map the "lookup latest" to promises.
+  }
+  /* Loop through and map the "lookup latest" to promises. */
 
 
   var _getNamesAndUntouched = getNamesAndUntouched(section, ignore),
@@ -366,39 +467,11 @@ var dependenciesLookup = function dependenciesLookup(section, ignore) {
 
   var mapNameToLatest = function mapNameToLatest(name) {
     return new Promise(function executee(resolve) {
-      lookupDistTags(name, function callback(error, prefix, distTags) {
-        var existing = section[name];
-
-        if (error) {
-          return resolve({
-            after: existing,
-            before: existing,
-            error: error,
-            isChanged: false,
-            isUpdatable: false,
-            name: name
-          });
-        }
-
-        var version = distTags.latest;
-        var isUpdatable = getIsUpdatable(existing, version);
-        var updated = prefix + version; // If there is no version or the version is the latest.
-
-        var result = {
-          after: updated,
-          before: existing,
-          isChanged: version !== null && isUpdatable && existing !== updated,
-          isUpdatable: isUpdatable,
-          name: name
-        };
-
-        if (result.isChanged) {
-          // Actually write to the package descriptor.
-          section[name] = updated;
-        }
-
-        return resolve(result);
-      });
+      lookupDistTags(name, createLookupDistTagsCallback({
+        resolve: resolve,
+        section: section,
+        name: name
+      }));
     });
   };
 
@@ -422,21 +495,21 @@ var createMapThen = function createMapThen(fn) {
 
 
 var getDepCounts = function getDepCounts(results) {
-  var changedDeps = results.filter(function iteratee(_ref5) {
-    var isChanged = _ref5.isChanged;
+  var changedDeps = results.filter(function iteratee(_ref8) {
+    var isChanged = _ref8.isChanged;
     return isChanged;
   }).length;
   return [results.length, changedDeps];
 };
 /**
- * @param {object} pkg - The package.json object.
+ * @param {object} packagePlus - The packagePlus object.
  * @param {{sections: Array<string>, json: boolean, 'only-changed': boolean, 'ignore-stars': boolean, 'ignore-pegged': boolean}} options - The user options.
  * @returns {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} The object of promise arrays.
  */
 
 
-var getDepPromises = function getDepPromises(pkg, options) {
-  var data = pkg.data;
+var getDepPromises = function getDepPromises(packagePlus, options) {
+  var data = packagePlus.data;
   var sections = options.sections,
       json = options.json,
       onlyChanged = options['only-changed'],
@@ -469,18 +542,18 @@ var getDepPromises = function getDepPromises(pkg, options) {
 /**
  *
  * @param {object} options - The user options.
- * @returns {function(object): object} That package object.
+ * @returns {function(object): object} The packagePlus object.
  */
 
 
 var createFoundPackageJsonLogger = function createFoundPackageJsonLogger(options) {
   var json = options.json;
-  return function foundPackageJsonLogger(pkg) {
-    if (pkg && !json) {
+  return function foundPackageJsonLogger(packagePlus) {
+    if (packagePlus && !json) {
       console.log('Found package.json.');
     }
 
-    return pkg;
+    return packagePlus;
   };
 };
 /**
@@ -519,7 +592,8 @@ var createPrinter = function createPrinter(depPromises, json) {
 
 var createPromiseAllPromises = function createPromiseAllPromises(options) {
   return function promiseAllPromises(pkg) {
-    var depPromises = getDepPromises(pkg, options); // Wait for all of them to resolve.
+    var depPromises = getDepPromises(pkg, options);
+    /* Wait for all of them to resolve. */
 
     return Promise.all(depPromises.promises).then(createPrinter(depPromises, options.json)).then(function thenee(dep) {
       return {
@@ -530,26 +604,33 @@ var createPromiseAllPromises = function createPromiseAllPromises(options) {
   };
 };
 /**
- * @param {object} options - The user options.
- * @param {function(Promise<Array<Array<number>>>): *} callback - The callback function.
- * @returns {Promise} - The promised callback.
+ * @param {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} dep - The depPromises object.
+ * @returns {Promise<Array<Array<number>>>} The promised array of counts.
  */
 
 
-var createPromiseCallback = function createPromiseCallback(options, callback) {
-  return function promiseCallback(_ref6) {
-    var pkg = _ref6.pkg,
-        dep = _ref6.dep;
+var getPromiseCounts = function getPromiseCounts(dep) {
+  return Promise.all(dep.lookups.map(createMapThen(getDepCounts)));
+};
+/**
+ * @param {function(Promise<Array<Array<number>>>): *} callback - The callback function.
+ * @param {object} options - The user options.
+ * @returns {function({packagePlus: object, dep: object})} - The callback result.
+ */
 
-    /**  @type {Promise<Array<Array<number>>>} */
-    var counts = Promise.all(dep.lookups.map(createMapThen(getDepCounts)));
-    var boundCallback = callback.bind(null, counts); // Write back the package.json.
+
+var createPromiseCallback = function createPromiseCallback(callback, options) {
+  return function promiseCallback(_ref9) {
+    var packagePlus = _ref9.packagePlus,
+        dep = _ref9.dep;
+    var counts = getPromiseCounts(dep);
+    /* Write back the package.json. */
 
     if (options['dry-run']) {
-      return promiseback(boundCallback);
+      return callback(counts);
     }
 
-    return pkg.save(boundCallback);
+    return packagePlus.save(callback.bind(null, counts));
   };
 };
 /**
@@ -557,18 +638,17 @@ var createPromiseCallback = function createPromiseCallback(options, callback) {
  *
  * @param {string} dir - The working directory.
  * @param {object} options - The user options.
- * @param {function(Array<Promise<number>>): *} callback - The callback function.
- * @returns {Promise} The done promise.
+ * @param {function(Promise<Array<Array<number>>>): *} callback - The callback function.
+ * @returns {Promise<*>} The done promise.
  */
 
 
 var salita = function salita(dir, options, callback) {
-  // Package.json.
   var filename = path.join(dir, 'package.json');
-  /** @type {Promise} */
+  /** @type {Promise<object>} */
 
-  var packageJSON = jsonFile(filename);
-  return packageJSON.then(loadNPM).then(createFoundPackageJsonLogger(options)).then(createPromiseAllPromises(options)).then(createPromiseCallback(options, callback)).done();
+  var packagePlus = jsonFilePlus(filename);
+  return packagePlus.then(loadNPM).then(createFoundPackageJsonLogger(options)).then(createPromiseAllPromises(options)).then(createPromiseCallback(callback, options)).done();
 };
 
 Object.defineProperty(salita, 'sections', {

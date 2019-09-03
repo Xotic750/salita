@@ -1,10 +1,9 @@
 const path = require('path');
 const npm = require('npm');
-const jsonFile = require('json-file-plus');
+const jsonFilePlus = require('json-file-plus');
 const Table = require('cli-table');
 const chalk = require('chalk');
 const semver = require('semver');
-const promiseback = require('promiseback');
 
 const deps = {
   dependencies: {section: 'dep', title: 'Dependencies'},
@@ -131,10 +130,10 @@ const createResultTable = function createResultTable(caption, onlyChanged) {
 };
 
 /**
- * @param {object} pkg - The package.json object.
+ * @param {object} packagePlus - The packagePlus object.
  * @returns {Promise<object>} The package.json object.
  */
-const loadNPM = function loadNPM(pkg) {
+const loadNPM = function loadNPM(packagePlus) {
   return new Promise(function executee(resolve, reject) {
     npm.load({}, function callback(err, result) {
       if (err) {
@@ -144,7 +143,7 @@ const loadNPM = function loadNPM(pkg) {
       }
     });
   }).then(function thenee() {
-    return pkg;
+    return packagePlus;
   });
 };
 
@@ -171,32 +170,39 @@ const isVersionPegged = function isVersionPegged(version) {
 };
 
 /**
+ * @param {Array} latest - The latest result array.
+ * @returns {Array} The latest result array.
+ */
+const assertLatestLength = function assertLatestLength(latest) {
+  if (latest.length !== 1) {
+    throw new Error(`expected 1 version key, got: ${latest}`);
+  }
+
+  return latest;
+};
+
+/**
  * Given a package name, lookup the semantic tags.
  *
  * @param {string} name - The module name.
- * @param {Function} callback - A function to call with the dist tags.
+ * @param {function(Error, {prefix: (undefined|string), tags: (undefined|object)}): *} callback - A function to call with the dist tags.
  */
 const lookupDistTags = function lookupDistTags(name, callback) {
-  // Need to require here, because NPM does all sorts of funky global attaching.
+  /*  Need to require here, because NPM does all sorts of funky global attaching. */
   /* eslint-disable-next-line global-require */
   const view = require('npm/lib/view');
   const prefix = npm.config.get('save-prefix');
 
-  // Call View directly to ensure the arguments actually work.
+  /* Call View directly to ensure the arguments actually work. */
   view([name, 'dist-tags'], true, function cb(err, desc) {
     if (err) {
-      return callback(err);
+      callback(err, {});
+    } else {
+      const latest = assertLatestLength(Object.keys(desc));
+      const tags = desc[latest]['dist-tags'];
+
+      callback(null, {prefix, tags});
     }
-
-    const latest = Object.keys(desc);
-
-    if (latest.length !== 1) {
-      throw new Error(`expected 1 version key, got: ${latest}`);
-    }
-
-    const tags = desc[latest]['dist-tags'];
-
-    return callback(null, prefix, tags);
   });
 };
 
@@ -283,6 +289,56 @@ const getNamesAndUntouched = function getNamesAndUntouched(section, {stars, pegg
 };
 
 /**
+ * @param {object} section - A section object.
+ * @returns {boolean} Is it a populated section object.
+ */
+const isSection = function isSection(section) {
+  return typeof section === 'object' && Boolean(section) && Object.keys(section).length > 0;
+};
+
+/**
+ * @param {{version: *, isUpdatable: boolean, existing: string, updated: string}} params - Parameters to check.
+ * @returns {boolean} - Has the version changed.
+ */
+const isVersionChanged = function isVersionChanged({version, isUpdatable, existing, updated}) {
+  return version !== null && isUpdatable && existing !== updated;
+};
+
+/**
+ * @param {{section: object, name: string, data: object, existing: string}} params - The parameters.
+ * @returns {{isUpdatable: boolean, before: string, isChanged: boolean, name: string, after: string}} The result.
+ */
+const updateDescriptorAndGetResult = function updateDescriptorAndGetResult({section, name, data, existing}) {
+  const version = data.tags.latest;
+  const isUpdatable = getIsUpdatable(existing, version);
+  const updated = data.prefix + version;
+  const isChanged = isVersionChanged({version, isUpdatable, existing, updated});
+
+  if (isChanged) {
+    /* Actually write to the package descriptor. */
+    section[name] = updated;
+  }
+
+  return {after: updated, before: existing, isChanged, isUpdatable, name};
+};
+
+/**
+ * @param {{resolve: Function, section: object, name: string}} params - The parameters.
+ * @returns {function(Error, {prefix: (undefined|string), tags: (undefined|object)})} The callback function.
+ */
+const createLookupDistTagsCallback = function createLookupDistTagsCallback({resolve, section, name}) {
+  return function lookupDistTagsCallback(error, data) {
+    const existing = section[name];
+
+    if (error) {
+      resolve({after: existing, before: existing, error, isChanged: false, isUpdatable: false, name});
+    } else {
+      resolve(updateDescriptorAndGetResult({section, name, data, existing}));
+    }
+  };
+};
+
+/**
  * CreateDependenciesLookup.
  *
  * @param {object} section - The package.json section object.
@@ -290,49 +346,17 @@ const getNamesAndUntouched = function getNamesAndUntouched(section, {stars, pegg
  * @returns {Array<Promise<object>>} An array of the promised objects.
  */
 const dependenciesLookup = function dependenciesLookup(section, ignore) {
-  // See if any dependencies of this type exist.
-  if (!section || !Object.keys(section).length) {
+  /* See if any dependencies of this type exist. */
+  if (isSection(section) === false) {
     return [];
   }
 
-  // Loop through and map the "lookup latest" to promises.
+  /* Loop through and map the "lookup latest" to promises. */
   const {names, untouched} = getNamesAndUntouched(section, ignore);
 
   const mapNameToLatest = function mapNameToLatest(name) {
     return new Promise(function executee(resolve) {
-      lookupDistTags(name, function callback(error, prefix, distTags) {
-        const existing = section[name];
-
-        if (error) {
-          return resolve({
-            after: existing,
-            before: existing,
-            error,
-            isChanged: false,
-            isUpdatable: false,
-            name,
-          });
-        }
-
-        const version = distTags.latest;
-        const isUpdatable = getIsUpdatable(existing, version);
-        const updated = prefix + version;
-        // If there is no version or the version is the latest.
-        const result = {
-          after: updated,
-          before: existing,
-          isChanged: version !== null && isUpdatable && existing !== updated,
-          isUpdatable,
-          name,
-        };
-
-        if (result.isChanged) {
-          // Actually write to the package descriptor.
-          section[name] = updated;
-        }
-
-        return resolve(result);
-      });
+      lookupDistTags(name, createLookupDistTagsCallback({resolve, section, name}));
     });
   };
 
@@ -362,12 +386,12 @@ const getDepCounts = function getDepCounts(results) {
 };
 
 /**
- * @param {object} pkg - The package.json object.
+ * @param {object} packagePlus - The packagePlus object.
  * @param {{sections: Array<string>, json: boolean, 'only-changed': boolean, 'ignore-stars': boolean, 'ignore-pegged': boolean}} options - The user options.
  * @returns {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} The object of promise arrays.
  */
-const getDepPromises = function getDepPromises(pkg, options) {
-  const {data} = pkg;
+const getDepPromises = function getDepPromises(packagePlus, options) {
+  const {data} = packagePlus;
   const {sections, json, 'only-changed': onlyChanged, 'ignore-stars': ignoreStars, 'ignore-pegged': ignorePegged} = options;
   const iteratee = function iteratee(promisesObject, key) {
     const {section, title} = deps[key];
@@ -389,17 +413,17 @@ const getDepPromises = function getDepPromises(pkg, options) {
 /**
  *
  * @param {object} options - The user options.
- * @returns {function(object): object} That package object.
+ * @returns {function(object): object} The packagePlus object.
  */
 const createFoundPackageJsonLogger = function createFoundPackageJsonLogger(options) {
   const {json} = options;
 
-  return function foundPackageJsonLogger(pkg) {
-    if (pkg && !json) {
+  return function foundPackageJsonLogger(packagePlus) {
+    if (packagePlus && !json) {
       console.log('Found package.json.');
     }
 
-    return pkg;
+    return packagePlus;
   };
 };
 
@@ -437,7 +461,7 @@ const createPromiseAllPromises = function createPromiseAllPromises(options) {
   return function promiseAllPromises(pkg) {
     const depPromises = getDepPromises(pkg, options);
 
-    // Wait for all of them to resolve.
+    /* Wait for all of them to resolve. */
     return Promise.all(depPromises.promises)
       .then(createPrinter(depPromises, options.json))
       .then(function thenee(dep) {
@@ -447,22 +471,28 @@ const createPromiseAllPromises = function createPromiseAllPromises(options) {
 };
 
 /**
+ * @param {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} dep - The depPromises object.
+ * @returns {Promise<Array<Array<number>>>} The promised array of counts.
+ */
+const getPromiseCounts = function getPromiseCounts(dep) {
+  return Promise.all(dep.lookups.map(createMapThen(getDepCounts)));
+};
+
+/**
  * @param {function(Promise<Array<Array<number>>>): *} callback - The callback function.
  * @param {object} options - The user options.
- * @returns {Promise<*>} - The promised callback.
+ * @returns {function({packagePlus: object, dep: object})} - The callback result.
  */
 const createPromiseCallback = function createPromiseCallback(callback, options) {
-  return function promiseCallback({pkg, dep}) {
-    /**  @type {Promise<Array<Array<number>>>} */
-    const counts = Promise.all(dep.lookups.map(createMapThen(getDepCounts)));
-    const boundCallback = callback.bind(null, counts);
+  return function promiseCallback({packagePlus, dep}) {
+    const counts = getPromiseCounts(dep);
 
-    // Write back the package.json.
+    /* Write back the package.json. */
     if (options['dry-run']) {
-      return promiseback(boundCallback);
+      return callback(counts);
     }
 
-    return pkg.save(boundCallback);
+    return packagePlus.save(callback.bind(null, counts));
   };
 };
 
@@ -471,16 +501,15 @@ const createPromiseCallback = function createPromiseCallback(callback, options) 
  *
  * @param {string} dir - The working directory.
  * @param {object} options - The user options.
- * @param {function(Array<Promise<number>>): *} callback - The callback function.
- * @returns {Promise} The done promise.
+ * @param {function(Promise<Array<Array<number>>>): *} callback - The callback function.
+ * @returns {Promise<*>} The done promise.
  */
 const salita = function salita(dir, options, callback) {
-  // Package.json.
   const filename = path.join(dir, 'package.json');
-  /** @type {Promise} */
-  const packageJSON = jsonFile(filename);
+  /** @type {Promise<object>} */
+  const packagePlus = jsonFilePlus(filename);
 
-  return packageJSON
+  return packagePlus
     .then(loadNPM)
     .then(createFoundPackageJsonLogger(options))
     .then(createPromiseAllPromises(options))

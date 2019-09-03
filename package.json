@@ -56,7 +56,6 @@
     "cli-table": "^0.3.1",
     "json-file-plus": "^3.3.1",
     "npm": "^5.10.0",
-    "promiseback": "^2.0.2",
     "semver": "^5.7.0",
     "yargs": "^10.1.2"
   },
