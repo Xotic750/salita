@@ -2,15 +2,19 @@
   "name": "@xotic750/salita",
   "version": "0.11.1",
   "description": "Automatically upgrade all dependencies, devDependencies, and peerDependencies",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/xotic750/salita.git"
+  "homepage": "https://github.com/Xotic750/salita",
+  "author": {
+    "name": "Graham Fairweather",
+    "email": "xotic750@gmail.com"
   },
-  "author": "Tim Branyen (@tbranyen)",
-  "license": "MIT",
-  "contributors": [
-    "Tim Branyen (https://github.com/tbranyen)",
-    "Jordan Harband <ljharb@gmail.com> (https://github.com/ljharb/)"
+  "copyright": "Copyright (c) 2019",
+  "keywords": [
+    "package",
+    "npm",
+    "update",
+    "module",
+    "javascript",
+    "nodejs"
   ],
   "files": [
     "dist",
@@ -38,6 +42,14 @@
     "test:ci": "npm run test -- --ci --maxWorkers=2",
     "test:ci-coveralls": "npm run test:ci -- --coverage --coverageReporters=text-lcov | coveralls",
     "test:coverage": "npm run test -- --coverage"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Xotic750/replace-x.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Xotic750/replace-x/issues"
   },
   "dependencies": {
     "chalk": "^2.4.2",
