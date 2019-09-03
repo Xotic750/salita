@@ -509,7 +509,7 @@ var getDepCounts = function getDepCounts(results) {
 };
 /**
  * @param {object} packagePlus - The packagePlus object.
- * @param {{sections: Array<string>, json: boolean, 'only-changed': boolean, 'ignore-stars': boolean, 'ignore-pegged': boolean}} options - The user options.
+ * @param {{sections: Array<string>, json: boolean, onlyChanged: boolean, ignoreStars: boolean, ignorePegged: boolean}} options - The user options.
  * @returns {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} The object of promise arrays.
  */
 
@@ -518,9 +518,9 @@ var getDepPromises = function getDepPromises(packagePlus, options) {
   var data = packagePlus.data;
   var sections = options.sections,
       json = options.json,
-      onlyChanged = options['only-changed'],
-      ignoreStars = options['ignore-stars'],
-      ignorePegged = options['ignore-pegged'];
+      onlyChanged = options.onlyChanged,
+      ignoreStars = options.ignoreStars,
+      ignorePegged = options.ignorePegged;
 
   var iteratee = function iteratee(promisesObject, key) {
     var _deps$key = deps[key],
@@ -592,18 +592,18 @@ var createPrinter = function createPrinter(depPromises, json) {
 };
 /**
  * @param {object} options - The user options.
- * @returns {function(object): Promise<{pkg: object, dep: {lookups: Array<Promise<object>>, promises: Array<Promise<object>>}}>} The pkg and dep objects.
+ * @returns {function(object): Promise<{packagePlus: object, dep: {lookups: Array<Promise<object>>, promises: Array<Promise<object>>}}>} The pkg and dep objects.
  */
 
 
 var createPromiseAllPromises = function createPromiseAllPromises(options) {
-  return function promiseAllPromises(pkg) {
-    var depPromises = getDepPromises(pkg, options);
+  return function promiseAllPromises(packagePlus) {
+    var depPromises = getDepPromises(packagePlus, options);
     /* Wait for all of them to resolve. */
 
     return Promise.all(depPromises.promises).then(createPrinter(depPromises, options.json)).then(function thenee(dep) {
       return {
-        pkg: pkg,
+        packagePlus: packagePlus,
         dep: dep
       };
     });
@@ -619,24 +619,47 @@ var getPromiseCounts = function getPromiseCounts(dep) {
   return Promise.all(dep.lookups.map(createMapThen(getDepCounts)));
 };
 /**
- * @param {function(Promise<Array<Array<number>>>): *} callback - The callback function.
- * @param {object} options - The user options.
- * @returns {function({packagePlus: object, dep: object})} - The callback result.
+ * @param {{changed: number, total: number}} acc - Totals accumulator.
+ * @param {Array<number>} category - Category counts.
+ * @returns {{changed: number, total: number}} The totals accumulator.
  */
 
 
-var createPromiseCallback = function createPromiseCallback(callback, options) {
-  return function promiseCallback(_ref9) {
+var countIteratee = function countIteratee(acc, category) {
+  acc.changed += category[1];
+  acc.total += category[0];
+  return acc;
+};
+/**
+ * @param {object} options - The user options.
+ * @returns {object} - The packagePlus object.
+ */
+
+
+var createCountAndSave = function createCountAndSave(options) {
+  var check = options.check,
+      json = options.json;
+  return function countAndSave(_ref9) {
     var packagePlus = _ref9.packagePlus,
         dep = _ref9.dep;
-    var counts = getPromiseCounts(dep);
-    /* Write back the package.json. */
+    return getPromiseCounts(dep).then(function thenee(counts) {
+      var sums = counts.reduce(countIteratee, {
+        changed: 0,
+        total: 0
+      });
 
-    if (options['dry-run']) {
-      return callback(counts);
-    }
+      if (!json) {
+        console.log("\n".concat(sums.changed, " updated out of ").concat(sums.total, " total dependencies."));
+      }
 
-    return packagePlus.save(callback.bind(null, counts));
+      if (check) {
+        return sums;
+      }
+      /* Write back the package.json. */
+
+
+      return options.dryRun ? packagePlus : packagePlus.save();
+    });
   };
 };
 /**
@@ -644,17 +667,16 @@ var createPromiseCallback = function createPromiseCallback(callback, options) {
  *
  * @param {string} dir - The working directory.
  * @param {object} options - The user options.
- * @param {function(Promise<Array<Array<number>>>): *} callback - The callback function.
- * @returns {Promise<*>} The done promise.
+ * @returns {Promise<object>} The packagePlus promise.
  */
 
 
-var salita = function salita(dir, options, callback) {
+var salita = function salita(dir, options) {
   var filename = path.join(dir, 'package.json');
   /** @type {Promise<object>} */
 
   var packagePlus = jsonFilePlus(filename);
-  return packagePlus.then(loadNPM).then(createFoundPackageJsonLogger(options)).then(createPromiseAllPromises(options)).then(createPromiseCallback(callback, options)).done();
+  return packagePlus.then(loadNPM).then(createFoundPackageJsonLogger(options)).then(createPromiseAllPromises(options)).then(createCountAndSave(options));
 };
 
 Object.defineProperty(salita, 'sections', {

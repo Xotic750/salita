@@ -55,9 +55,9 @@
     "chalk": "^2.4.2",
     "cli-table": "^0.3.1",
     "json-file-plus": "^3.3.1",
-    "npm": "^5.10.0",
-    "semver": "^5.7.0",
-    "yargs": "^10.1.2"
+    "npm": "^6.11.2",
+    "semver": "^6.3.0",
+    "yargs": "^14.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",

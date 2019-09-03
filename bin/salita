@@ -80,7 +80,6 @@ const options = yargs
   .strict()
   .wrap(null)
   .check(function checkContradictions(argv) {
-    /* eslint no-throw-literal: 0 , max-statements: 0 */
     if (argv.update === true && argv.check === true) {
       throw 'Error: --update and --check are mutually exclusive';
     }
@@ -134,23 +133,9 @@ if (!options.update) {
   console.warn('Running in dry-run mode. Use --update to persist changes to package.json.');
 }
 
-salita(process.cwd(), options, function(countsPromise) {
-  countsPromise.then(function(counts) {
-    const sums = counts.reduce(
-      function(acc, category) {
-        return [acc[0] + category[0], acc[1] + category[1]];
-      },
-      [0, 0],
-    );
-    const total = sums[0];
-    const changed = sums[1];
-
-    if (!options.json) {
-      console.error(`\n${changed} updated out of ${total} total dependencies.`);
-    }
-
-    if (options.check) {
-      process.exit(changed);
-    }
-  });
+console.log(options);
+salita(process.cwd(), options).then(function thenee(object) {
+  if (options.check) {
+    process.exit(object.changed);
+  }
 });

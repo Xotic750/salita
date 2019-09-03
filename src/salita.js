@@ -393,12 +393,12 @@ const getDepCounts = function getDepCounts(results) {
 
 /**
  * @param {object} packagePlus - The packagePlus object.
- * @param {{sections: Array<string>, json: boolean, 'only-changed': boolean, 'ignore-stars': boolean, 'ignore-pegged': boolean}} options - The user options.
+ * @param {{sections: Array<string>, json: boolean, onlyChanged: boolean, ignoreStars: boolean, ignorePegged: boolean}} options - The user options.
  * @returns {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} The object of promise arrays.
  */
 const getDepPromises = function getDepPromises(packagePlus, options) {
   const {data} = packagePlus;
-  const {sections, json, 'only-changed': onlyChanged, 'ignore-stars': ignoreStars, 'ignore-pegged': ignorePegged} = options;
+  const {sections, json, onlyChanged, ignoreStars, ignorePegged} = options;
   const iteratee = function iteratee(promisesObject, key) {
     const {section, title} = deps[key];
 
@@ -461,17 +461,17 @@ const createPrinter = function createPrinter(depPromises, json) {
 
 /**
  * @param {object} options - The user options.
- * @returns {function(object): Promise<{pkg: object, dep: {lookups: Array<Promise<object>>, promises: Array<Promise<object>>}}>} The pkg and dep objects.
+ * @returns {function(object): Promise<{packagePlus: object, dep: {lookups: Array<Promise<object>>, promises: Array<Promise<object>>}}>} The packagePlus and dep objects.
  */
 const createPromiseAllPromises = function createPromiseAllPromises(options) {
-  return function promiseAllPromises(pkg) {
-    const depPromises = getDepPromises(pkg, options);
+  return function promiseAllPromises(packagePlus) {
+    const depPromises = getDepPromises(packagePlus, options);
 
     /* Wait for all of them to resolve. */
     return Promise.all(depPromises.promises)
       .then(createPrinter(depPromises, options.json))
       .then(function thenee(dep) {
-        return {pkg, dep};
+        return {packagePlus, dep};
       });
   };
 };
@@ -485,20 +485,39 @@ const getPromiseCounts = function getPromiseCounts(dep) {
 };
 
 /**
- * @param {function(Promise<Array<Array<number>>>): *} callback - The callback function.
- * @param {object} options - The user options.
- * @returns {function({packagePlus: object, dep: object})} - The callback result.
+ * @param {{changed: number, total: number}} acc - Totals accumulator.
+ * @param {Array<number>} category - Category counts.
+ * @returns {{changed: number, total: number}} The totals accumulator.
  */
-const createPromiseCallback = function createPromiseCallback(callback, options) {
-  return function promiseCallback({packagePlus, dep}) {
-    const counts = getPromiseCounts(dep);
+const countIteratee = function countIteratee(acc, category) {
+  acc.changed += category[1];
+  acc.total += category[0];
 
-    /* Write back the package.json. */
-    if (options['dry-run']) {
-      return callback(counts);
-    }
+  return acc;
+};
 
-    return packagePlus.save(callback.bind(null, counts));
+/**
+ * @param {object} options - The user options.
+ * @returns {object} - The packagePlus object.
+ */
+const createCountAndSave = function createCountAndSave(options) {
+  const {check, json} = options;
+
+  return function countAndSave({packagePlus, dep}) {
+    return getPromiseCounts(dep).then(function thenee(counts) {
+      const sums = counts.reduce(countIteratee, {changed: 0, total: 0});
+
+      if (!json) {
+        console.log(`\n${sums.changed} updated out of ${sums.total} total dependencies.`);
+      }
+
+      if (check) {
+        return sums;
+      }
+
+      /* Write back the package.json. */
+      return options.dryRun ? packagePlus : packagePlus.save();
+    });
   };
 };
 
@@ -507,10 +526,9 @@ const createPromiseCallback = function createPromiseCallback(callback, options) 
  *
  * @param {string} dir - The working directory.
  * @param {object} options - The user options.
- * @param {function(Promise<Array<Array<number>>>): *} callback - The callback function.
- * @returns {Promise<*>} The done promise.
+ * @returns {Promise<object>} The packagePlus promise.
  */
-const salita = function salita(dir, options, callback) {
+const salita = function salita(dir, options) {
   const filename = path.join(dir, 'package.json');
   /** @type {Promise<object>} */
   const packagePlus = jsonFilePlus(filename);
@@ -519,8 +537,7 @@ const salita = function salita(dir, options, callback) {
     .then(loadNPM)
     .then(createFoundPackageJsonLogger(options))
     .then(createPromiseAllPromises(options))
-    .then(createPromiseCallback(callback, options))
-    .done();
+    .then(createCountAndSave(options));
 };
 
 Object.defineProperty(salita, 'sections', {
