@@ -5,6 +5,17 @@ const Table = require('cli-table');
 const chalk = require('chalk');
 const semver = require('semver');
 
+/**
+ * @typedef {object} PackagePlus
+ * @property {object} data
+ * @property {object} format
+ * @property {Function} get
+ * @property {Function} set
+ * @property {Function} remove
+ * @property {string} filename
+ * @property {Function} save
+ */
+
 const deps = {
   dependencies: {section: 'dep', title: 'Dependencies'},
   devDependencies: {section: 'dev', title: 'Development Dependencies'},
@@ -136,8 +147,8 @@ const createResultTable = function createResultTable(caption, onlyChanged) {
 };
 
 /**
- * @param {object} packagePlus - The packagePlus object.
- * @returns {Promise<object>} The package.json object.
+ * @param {PackagePlus} packagePlus - The packagePlus object.
+ * @returns {Promise<PackagePlus>} The package.json object.
  */
 const loadNPM = function loadNPM(packagePlus) {
   return new Promise(function executee(resolve, reject) {
@@ -370,8 +381,8 @@ const dependenciesLookup = function dependenciesLookup(section, ignore) {
 };
 
 /**
- * @param {function(Array<object>): Array<number>} fn - The function to execute on resolve.
- * @returns {function(Promise<object>): (Promise<Array<number>>)} - Promise of result lengths.
+ * @param {function(Array<object>): TotalsArray} fn - The function to execute on resolve.
+ * @returns {function(Promise<object>): (Promise<TotalsArray>)} - Promise of result lengths.
  */
 const createMapThen = function createMapThen(fn) {
   return function mapThen(promise) {
@@ -380,37 +391,58 @@ const createMapThen = function createMapThen(fn) {
 };
 
 /**
+ * Total and Changed.
+ *
+ * @typedef {Array<number>} TotalsArray
+ */
+
+/**
  * @param {object} results - The results object.
- * @returns {[number, number]} The array of dependency counts.
+ * @returns {TotalsArray} The array of dependency counts.
  */
 const getDepCounts = function getDepCounts(results) {
+  /** @type {number} */
   const changedDeps = results.filter(function iteratee({isChanged}) {
     return isChanged;
   }).length;
 
-  return [results.length, changedDeps];
+  /** @type {number} */
+  const totalDeps = results.length;
+
+  return [totalDeps, changedDeps];
 };
 
 /**
- * @param {object} packagePlus - The packagePlus object.
+ * @typedef {object} DepPromises
+ * @property {Array<Promise<object>>} lookups
+ * @property {Array<Promise<object>>} promises
+ */
+
+/**
+ * @param {PackagePlus} packagePlus - The packagePlus object.
  * @param {{sections: Array<string>, json: boolean, onlyChanged: boolean, ignoreStars: boolean, ignorePegged: boolean}} options - The user options.
- * @returns {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} The object of promise arrays.
+ * @returns {DepPromises} The object of promise arrays.
  */
 const getDepPromises = function getDepPromises(packagePlus, options) {
   const {data} = packagePlus;
   const {sections, json, onlyChanged, ignoreStars, ignorePegged} = options;
-  const iteratee = function iteratee(promisesObject, key) {
+  /**
+   * @param {DepPromises} depPromises - The object of promise arrays.
+   * @param {string} key - The deps key.
+   * @returns {DepPromises} The object of promise arrays.
+   */
+  const iteratee = function iteratee(depPromises, key) {
     const {section, title} = deps[key];
 
     if (sections.indexOf(section) !== -1) {
       const depLookup = Promise.all(dependenciesLookup(data[key], {stars: ignoreStars, pegged: ignorePegged}));
-      promisesObject.lookups.push(depLookup);
+      depPromises.lookups.push(depLookup);
 
       const create = json ? createResultJSON(key, onlyChanged) : createResultTable(title, onlyChanged);
-      promisesObject.promises.push(depLookup.then(create));
+      depPromises.promises.push(depLookup.then(create));
     }
 
-    return promisesObject;
+    return depPromises;
   };
 
   return depsKeys.reduce(iteratee, {lookups: [], promises: []});
@@ -419,7 +451,7 @@ const getDepPromises = function getDepPromises(packagePlus, options) {
 /**
  *
  * @param {object} options - The user options.
- * @returns {function(object): object} The packagePlus object.
+ * @returns {function(PackagePlus): PackagePlus} The packagePlus object.
  */
 const createFoundPackageJsonLogger = function createFoundPackageJsonLogger(options) {
   const {json} = options;
@@ -443,9 +475,9 @@ const printEach = function printEach(results) {
 };
 
 /**
- * @param {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} depPromises - The object of promise arrays.
+ * @param {DepPromises} depPromises - The object of promise arrays.
  * @param {boolean} json - To print JSON or not.
- * @returns {function(Array): {lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} The depPromises object.
+ * @returns {function(Array): DepPromises} The depPromises object.
  */
 const createPrinter = function createPrinter(depPromises, json) {
   return function printer(depResults) {
@@ -460,8 +492,14 @@ const createPrinter = function createPrinter(depPromises, json) {
 };
 
 /**
+ * @typedef {object} PlusPromises
+ * @property {PackagePlus} packagePlus
+ * @property {DepPromises} depPromises
+ */
+
+/**
  * @param {object} options - The user options.
- * @returns {function(object): Promise<{packagePlus: object, dep: {lookups: Array<Promise<object>>, promises: Array<Promise<object>>}}>} The packagePlus and dep objects.
+ * @returns {function(PackagePlus): Promise<PlusPromises>} The packagePlus and depPromises.
  */
 const createPromiseAllPromises = function createPromiseAllPromises(options) {
   return function promiseAllPromises(packagePlus) {
@@ -470,24 +508,30 @@ const createPromiseAllPromises = function createPromiseAllPromises(options) {
     /* Wait for all of them to resolve. */
     return Promise.all(depPromises.promises)
       .then(createPrinter(depPromises, options.json))
-      .then(function thenee(dep) {
-        return {packagePlus, dep};
+      .then(function thenee() {
+        return {packagePlus, depPromises};
       });
   };
 };
 
 /**
- * @param {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} dep - The depPromises object.
- * @returns {Promise<Array<Array<number>>>} The promised array of counts.
+ * @param {DepPromises} depPromises - The depPromises object.
+ * @returns {Promise<Array<TotalsArray>>} The promised array of counts.
  */
-const getPromiseCounts = function getPromiseCounts(dep) {
-  return Promise.all(dep.lookups.map(createMapThen(getDepCounts)));
+const getPromiseCounts = function getPromiseCounts(depPromises) {
+  return Promise.all(depPromises.lookups.map(createMapThen(getDepCounts)));
 };
 
 /**
- * @param {{changed: number, total: number}} acc - Totals accumulator.
- * @param {Array<number>} category - Category counts.
- * @returns {{changed: number, total: number}} The totals accumulator.
+ * @typedef {object} TotalsObject
+ * @property {number} changed
+ * @property {number} total
+ */
+
+/**
+ * @param {TotalsObject} acc - Totals accumulator.
+ * @param {TotalsArray} category - Category counts.
+ * @returns {TotalsObject} The totals accumulator.
  */
 const countIteratee = function countIteratee(acc, category) {
   acc.changed += category[1];
@@ -498,13 +542,13 @@ const countIteratee = function countIteratee(acc, category) {
 
 /**
  * @param {object} options - The user options.
- * @returns {object} - The packagePlus object.
+ * @returns {function(PlusPromises): Promise<(TotalsObject|PackagePlus)>} - The final results.
  */
 const createCountAndSave = function createCountAndSave(options) {
   const {check, json} = options;
 
-  return function countAndSave({packagePlus, dep}) {
-    return getPromiseCounts(dep).then(function thenee(counts) {
+  return function countAndSave({packagePlus, depPromises}) {
+    return getPromiseCounts(depPromises).then(function thenee(counts) {
       const sums = counts.reduce(countIteratee, {changed: 0, total: 0});
 
       if (!json) {
@@ -526,7 +570,7 @@ const createCountAndSave = function createCountAndSave(options) {
  *
  * @param {string} dir - The working directory.
  * @param {object} options - The user options.
- * @returns {Promise<object>} The packagePlus promise.
+ * @returns {Promise<(TotalsObject|PackagePlus)>} The packagePlus promise.
  */
 const salita = function salita(dir, options) {
   const filename = path.join(dir, 'package.json');

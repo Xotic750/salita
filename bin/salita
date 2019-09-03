@@ -133,7 +133,6 @@ if (!options.update) {
   console.warn('Running in dry-run mode. Use --update to persist changes to package.json.');
 }
 
-console.log(options);
 salita(process.cwd(), options).then(function thenee(object) {
   if (options.check) {
     process.exit(object.changed);
