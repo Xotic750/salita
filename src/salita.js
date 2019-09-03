@@ -286,7 +286,7 @@ const getNamesAndUntouched = function getNamesAndUntouched(section, {stars, pegg
  *
  * @param {object} section - The package.json section object.
  * @param {{stars: boolean, pegged: boolean}} ignore - Ignore options.
- * @returns {Array<Promise<object>>}
+ * @returns {Array<Promise<object>>} An array of the promised objects.
  */
 const dependenciesLookup = function dependenciesLookup(section, ignore) {
   // See if any dependencies of this type exist.
@@ -349,8 +349,8 @@ const createMapThen = function createMapThen(fn) {
 };
 
 /**
- * @param results
- * @returns {[*, *]}
+ * @param {object} results - The results object.
+ * @returns {[number, number]} The array of dependency counts.
  */
 const getDepCounts = function getDepCounts(results) {
   const changedDeps = results.filter(function iteratee({isChanged}) {

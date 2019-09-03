@@ -347,7 +347,7 @@ var getNamesAndUntouched = function getNamesAndUntouched(section, _ref4) {
  *
  * @param {object} section - The package.json section object.
  * @param {{stars: boolean, pegged: boolean}} ignore - Ignore options.
- * @returns {Array<Promise<object>>}
+ * @returns {Array<Promise<object>>} An array of the promised objects.
  */
 
 
@@ -414,8 +414,8 @@ var createMapThen = function createMapThen(fn) {
   };
 };
 /**
- * @param results
- * @returns {[*, *]}
+ * @param {object} results - The results object.
+ * @returns {[number, number]} The array of dependency counts.
  */
 
 
