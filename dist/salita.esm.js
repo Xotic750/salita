@@ -24,6 +24,8 @@ var chalk = require('chalk');
 
 var semver = require('semver');
 
+var promiseback = require('promiseback');
+
 var deps = {
   dependencies: {
     section: 'dep',
@@ -427,20 +429,21 @@ var getDepCounts = function getDepCounts(results) {
   return [results.length, changedDeps];
 };
 /**
- * @param data
- * @param options
- * @returns {{lookups: [], promises: []}}
+ * @param {object} pkg - The package.json object.
+ * @param {{sections: Array<string>, json: boolean, 'only-changed': boolean, 'ignore-stars': boolean, 'ignore-pegged': boolean}} options - The user options.
+ * @returns {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} The object of promise arrays.
  */
 
 
-var getDepPromises = function getDepPromises(_ref6, options) {
-  var data = _ref6.data;
+var getDepPromises = function getDepPromises(pkg, options) {
+  var data = pkg.data;
   var sections = options.sections,
       json = options.json,
       onlyChanged = options['only-changed'],
       ignoreStars = options['ignore-stars'],
       ignorePegged = options['ignore-pegged'];
-  return Object.keys(deps).reduce(function iteratee(promisesObject, key) {
+
+  var iteratee = function iteratee(promisesObject, key) {
     var _deps$key = deps[key],
         section = _deps$key.section,
         title = _deps$key.title;
@@ -456,46 +459,116 @@ var getDepPromises = function getDepPromises(_ref6, options) {
     }
 
     return promisesObject;
-  }, {
+  };
+
+  return Object.keys(deps).reduce(iteratee, {
     lookups: [],
     promises: []
   });
 };
 /**
+ *
+ * @param {object} options - The user options.
+ * @returns {function(object): object} That package object.
+ */
+
+
+var createFoundPackageJsonLogger = function createFoundPackageJsonLogger(options) {
+  var json = options.json;
+  return function foundPackageJsonLogger(pkg) {
+    if (pkg && !json) {
+      console.log('Found package.json.');
+    }
+
+    return pkg;
+  };
+};
+/**
+ * @param {object} results - The results object.
+ */
+
+
+var printEach = function printEach(results) {
+  results.map(String).forEach(function innerIteratee(result) {
+    console.log(result);
+  });
+};
+/**
+ * @param {{lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} depPromises - The object of promise arrays.
+ * @param {boolean} json - To print JSON or not.
+ * @returns {function(Array): {lookups: Array<Promise<object>>, promises: Array<Promise<object>>}} The depPromises object.
+ */
+
+
+var createPrinter = function createPrinter(depPromises, json) {
+  return function printer(depResults) {
+    if (json) {
+      console.log(JSON.stringify(Object.assign.apply(null, [{}].concat(depResults)), null, 2));
+    } else {
+      depResults.forEach(printEach);
+    }
+
+    return depPromises;
+  };
+};
+/**
+ * @param {object} options - The user options.
+ * @returns {function(object): Promise<{pkg: object, dep: {lookups: Array<Promise<object>>, promises: Array<Promise<object>>}}>} The pkg and dep objects.
+ */
+
+
+var createPromiseAllPromises = function createPromiseAllPromises(options) {
+  return function promiseAllPromises(pkg) {
+    var depPromises = getDepPromises(pkg, options); // Wait for all of them to resolve.
+
+    return Promise.all(depPromises.promises).then(createPrinter(depPromises, options.json)).then(function thenee(dep) {
+      return {
+        pkg: pkg,
+        dep: dep
+      };
+    });
+  };
+};
+/**
+ * @param {object} options - The user options.
+ * @param {function(Promise<Array<Array<number>>>): *} callback - The callback function.
+ * @returns {Promise} - The promised callback.
+ */
+
+
+var createPromiseCallback = function createPromiseCallback(options, callback) {
+  return function promiseCallback(_ref6) {
+    var pkg = _ref6.pkg,
+        dep = _ref6.dep;
+
+    /**  @type {Promise<Array<Array<number>>>} */
+    var counts = Promise.all(dep.lookups.map(createMapThen(getDepCounts)));
+    var boundCallback = callback.bind(null, counts); // Write back the package.json.
+
+    if (options['dry-run']) {
+      return promiseback(boundCallback);
+    }
+
+    return pkg.save(boundCallback);
+  };
+};
+/**
  * The main entry point.
+ *
+ * @param {string} dir - The working directory.
+ * @param {object} options - The user options.
+ * @param {function(Array<Promise<number>>): *} callback - The callback function.
+ * @returns {Promise} The done promise.
  */
 
 
 var salita = function salita(dir, options, callback) {
   // Package.json.
   var filename = path.join(dir, 'package.json');
-  jsonFile(filename).then(loadNPM).then(function thenee(pkg) {
-    if (pkg && !options.json) {
-      console.log('Found package.json.');
-    }
+  /** @type {Promise} */
 
-    var dep = getDepPromises(pkg, options); // Wait for all of them to resolve.
-
-    Promise.all(dep.promises).then(function theneeAll(depResults) {
-      if (options.json) {
-        console.log(JSON.stringify(Object.assign.apply(null, [{}].concat(depResults)), null, 2));
-      } else {
-        depResults.forEach(function outerIteratee(results) {
-          results.map(String).forEach(function innerIteratee(result) {
-            console.log(result);
-          });
-        });
-      }
-
-      var counts = Promise.all(dep.lookups.map(createMapThen(getDepCounts))); // Write back the package.json.
-
-      if (options['dry-run']) {
-        return callback(counts);
-      }
-
-      return pkg.save(callback.bind(null, counts));
-    });
-  }).done();
+  var packageJSON = jsonFile(filename);
+  return packageJSON.then(loadNPM).then(createFoundPackageJsonLogger(options)).then(createPromiseAllPromises(options)).then(createPromiseCallback(options, callback)).done();
 };
 
 Object.defineProperty(salita, 'sections', {
