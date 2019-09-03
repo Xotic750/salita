@@ -11,6 +11,12 @@ const deps = {
   peerDependencies: {section: 'peer', title: 'Peer Dependencies'},
 };
 
+const depsKeys = Object.keys(deps);
+
+const depsSections = depsKeys.map(function iteratee(key) {
+  return deps[key].section;
+});
+
 /**
  * @param {object} tableChars - Table options chars.
  * @param {string} key - Char key.
@@ -407,7 +413,7 @@ const getDepPromises = function getDepPromises(packagePlus, options) {
     return promisesObject;
   };
 
-  return Object.keys(deps).reduce(iteratee, {lookups: [], promises: []});
+  return depsKeys.reduce(iteratee, {lookups: [], promises: []});
 };
 
 /**
@@ -519,13 +525,9 @@ const salita = function salita(dir, options, callback) {
 
 Object.defineProperty(salita, 'sections', {
   enumerable: true,
-  value: Object.keys(deps).map(function iteratee(key) {
-    return deps[key].section;
-  }),
+  get() {
+    return depsSections.slice();
+  },
 });
-
-if (Object.freeze) {
-  Object.freeze(salita.sections);
-}
 
 module.exports = salita;
