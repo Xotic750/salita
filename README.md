@@ -70,7 +70,7 @@ cd my_project
 # Upgrade all dependencies.
 salita
 Running in dry-run mode. Use --update to persist changes to package.json.
-Found: /Users/grahamfairweather/.private/salita/package.json
+Found: /Users/me/my_directory/package.json
 Dependencies:
  Kept:   chalk           at  ^2.4.2  
  Kept:   cli-table       at  ^0.3.1  
