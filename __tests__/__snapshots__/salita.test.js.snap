@@ -24,11 +24,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "3.1.0",
+      "safe-to-string-x": "1.5.0",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "*",
+      "jquery-ui": "*",
     },
     "version": "1.0.0",
   },
@@ -47,11 +47,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "^3.3.3",
+      "safe-to-string-x": "^2.0.3",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "*",
+      "jquery-ui": "*",
     },
     "version": "1.0.0",
   },
@@ -70,11 +70,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "3.1.0",
+      "safe-to-string-x": "1.5.0",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "*",
+      "jquery-ui": "*",
     },
     "version": "1.0.0",
   },
@@ -93,11 +93,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "3.1.0",
+      "safe-to-string-x": "1.5.0",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "*",
+      "jquery-ui": "*",
     },
     "version": "1.0.0",
   },
@@ -122,20 +122,20 @@ exports[`salita stdout it emits json 1`] = `
   ],
   \\"devDependencies\\": [
     {
-      \\"after\\": \\"^3.3.3\\",
-      \\"before\\": \\"3.1.0\\",
+      \\"after\\": \\"^2.0.3\\",
+      \\"before\\": \\"1.5.0\\",
       \\"isChanged\\": true,
       \\"isUpdatable\\": true,
-      \\"name\\": \\"json3\\"
+      \\"name\\": \\"safe-to-string-x\\"
     }
   ],
   \\"peerDependencies\\": [
     {
-      \\"after\\": \\"^3.3.3\\",
+      \\"after\\": \\"^1.12.1\\",
       \\"before\\": \\"*\\",
       \\"isChanged\\": true,
       \\"isUpdatable\\": true,
-      \\"name\\": \\"json3\\"
+      \\"name\\": \\"jquery-ui\\"
     }
   ]
 }
@@ -147,9 +147,9 @@ exports[`salita stdout it emits with color 1`] = `
 [32m[4mDependencies:[24m[39m
  [32mChanged: [39m  json3  from  [33m^3.1.0[39m  to  [33m^3.3.3[39m 
 [32m[4mDevelopment Dependencies:[24m[39m
- [32mChanged: [39m  json3  from  [33m3.1.0[39m  to  [33m^3.3.3[39m 
+ [32mChanged: [39m  safe-to-string-x  from  [33m1.5.0[39m  to  [33m^2.0.3[39m 
 [32m[4mPeer Dependencies:[24m[39m
- [32mChanged: [39m  json3  from  [33m*[39m  to  [33m^3.3.3[39m 
+ [32mChanged: [39m  jquery-ui  from  [33m*[39m  to  [33m^1.12.1[39m 
 
 3 updated out of 3 total dependencies.
 
@@ -161,9 +161,9 @@ exports[`salita stdout it emits without color 1`] = `
 Dependencies:
  Changed:   json3  from  ^3.1.0  to  ^3.3.3 
 Development Dependencies:
- Changed:   json3  from  3.1.0  to  ^3.3.3 
+ Changed:   safe-to-string-x  from  1.5.0  to  ^2.0.3 
 Peer Dependencies:
- Changed:   json3  from  *  to  ^3.3.3 
+ Changed:   jquery-ui  from  *  to  ^1.12.1 
 
 3 updated out of 3 total dependencies.
 
@@ -177,11 +177,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "^3.3.3",
+      "safe-to-string-x": "^2.0.3",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "^3.3.3",
+      "jquery-ui": "^1.12.1",
     },
     "version": "1.0.0",
   },
@@ -265,11 +265,11 @@ JSONData {
       "json3": "^3.1.0",
     },
     "devDependencies": Object {
-      "json3": "3.1.0",
+      "safe-to-string-x": "1.5.0",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "*",
+      "jquery-ui": "*",
     },
     "version": "1.0.0",
   },
@@ -353,11 +353,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "^3.3.3",
+      "safe-to-string-x": "^2.0.3",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "^3.3.3",
+      "jquery-ui": "^1.12.1",
     },
     "version": "1.0.0",
   },
@@ -441,11 +441,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "^3.3.3",
+      "safe-to-string-x": "^2.0.3",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "*",
+      "jquery-ui": "*",
     },
     "version": "1.0.0",
   },
@@ -529,11 +529,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "3.1.0",
+      "safe-to-string-x": "1.5.0",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "^3.3.3",
+      "jquery-ui": "^1.12.1",
     },
     "version": "1.0.0",
   },
@@ -617,11 +617,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "3.1.0",
+      "safe-to-string-x": "1.5.0",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "*",
+      "jquery-ui": "*",
     },
     "version": "1.0.0",
   },
@@ -705,11 +705,11 @@ JSONData {
       "json3": "^3.1.0",
     },
     "devDependencies": Object {
-      "json3": "^3.3.3",
+      "safe-to-string-x": "^2.0.3",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "^3.3.3",
+      "jquery-ui": "^1.12.1",
     },
     "version": "1.0.0",
   },
@@ -793,11 +793,11 @@ JSONData {
       "json3": "^3.1.0",
     },
     "devDependencies": Object {
-      "json3": "^3.3.3",
+      "safe-to-string-x": "^2.0.3",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "*",
+      "jquery-ui": "*",
     },
     "version": "1.0.0",
   },
@@ -881,11 +881,11 @@ JSONData {
       "json3": "^3.1.0",
     },
     "devDependencies": Object {
-      "json3": "3.1.0",
+      "safe-to-string-x": "1.5.0",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "^3.3.3",
+      "jquery-ui": "^1.12.1",
     },
     "version": "1.0.0",
   },
@@ -969,11 +969,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "^3.3.3",
+      "safe-to-string-x": "^2.0.3",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "^3.3.3",
+      "jquery-ui": "^1.12.1",
     },
     "version": "1.0.0",
   },
@@ -1057,11 +1057,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "^3.3.3",
+      "safe-to-string-x": "^2.0.3",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "^3.3.3",
+      "jquery-ui": "^1.12.1",
     },
     "version": "1.0.0",
   },
@@ -1145,11 +1145,11 @@ JSONData {
       "json3": "^3.3.3",
     },
     "devDependencies": Object {
-      "json3": "^3.3.3",
+      "safe-to-string-x": "^2.0.3",
     },
     "name": "tests",
     "peerDependencies": Object {
-      "json3": "^3.3.3",
+      "jquery-ui": "^1.12.1",
     },
     "version": "1.0.0",
   },
