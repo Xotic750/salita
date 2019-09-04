@@ -15,6 +15,7 @@ import view from 'npm/lib/view';
  * @property {Function} remove
  * @property {string} filename
  * @property {Function} save
+ * @property {Function} saveSync
  */
 
 /**
@@ -562,26 +563,37 @@ const countIteratee = function countIteratee(acc, category) {
 };
 
 /**
+ * @param {TotalsObject} sums - The sums object.
+ * @param {object} options - The user options.
+ */
+const printSums = function printSums(sums, options) {
+  if (!options.json && !options.quiet) {
+    process.stdout.write(`\n${sums.changed} updated out of ${sums.total} total dependencies.\n\n`);
+  }
+};
+
+/**
  * @param {object} options - The user options.
  * @returns {function(PlusPromises): Promise<(TotalsObject|PackagePlus)>} - The final results.
  */
 const createCountAndSave = function createCountAndSave(options) {
-  const {check, json, quiet} = options;
-
   return function countAndSave({packagePlus, depPromises}) {
     return getPromiseCounts(depPromises).then(function thenee(counts) {
+      /** @type {TotalsObject} */
       const sums = counts.reduce(countIteratee, {changed: 0, total: 0});
 
-      if (!json && !quiet) {
-        process.stdout.write(`\n${sums.changed} updated out of ${sums.total} total dependencies.\n\n`);
-      }
+      printSums(sums, options);
 
-      if (check) {
+      if (options.check) {
         return sums;
       }
 
-      /* Write back the package.json. */
-      return options.dryRun ? packagePlus : packagePlus.save();
+      if (!options.dryRun && options.update) {
+        /* Write back the package.json. */
+        packagePlus.saveSync();
+      }
+
+      return packagePlus;
     });
   };
 };
@@ -625,8 +637,10 @@ const defaultOptions = function defaultOptions() {
  */
 const normalizeSections = function normalizeSections(optionValue, defaultValue) {
   return optionValue.reduce(function iteratee(acc, item) {
-    if (acc.indexOf(item) === -1 && defaultValue.indexOf(item) !== -1) {
-      acc.push(item);
+    const string = String(item);
+
+    if (acc.indexOf(string) === -1 && defaultValue.indexOf(string) !== -1) {
+      acc.push(string);
     }
 
     return acc;
@@ -670,8 +684,8 @@ const normalizeOptions = function normalizeOptions(options) {
  * The main entry point.
  *
  * @param {string} dir - The working directory.
- * @param {object} options - The user options.
- * @returns {Promise<(TotalsObject|PackagePlus)>} The packagePlus promise.
+ * @param {object} [options=UserOptions] - The user options.
+ * @returns {Promise<(TotalsObject|PackagePlus)>} The promise of TotalsObject or PackagePlus.
  */
 const salita = function salita(dir, options) {
   if (typeof dir !== 'string') {
@@ -681,10 +695,8 @@ const salita = function salita(dir, options) {
   const opts = normalizeOptions(options);
   chalk.enabled = opts.color && !opts.json;
   const filename = path.join(dir, 'package.json');
-  /** @type {Promise<object>} */
-  const packagePlus = jsonFilePlus(filename);
 
-  return Promise.resolve(packagePlus)
+  return Promise.resolve(jsonFilePlus(filename))
     .then(loadNPM)
     .then(createFoundPackageJsonLogger(opts))
     .then(createPromiseAllPromises(opts))

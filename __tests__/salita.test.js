@@ -1,5 +1,15 @@
+import fs from 'fs';
+import rimraf from 'rimraf';
 import powerSet from 'power-set-x';
 import salita from '../src/salita';
+
+const noop = function noop() {};
+
+const resetTemp = function resetTemp() {
+  rimraf.sync('__tests__/files/temp/package.json', {}, noop);
+  const lessSource = fs.readFileSync('__tests__/files/all-deps/package.json', 'utf8');
+  fs.writeFileSync('__tests__/files/temp/package.json', lessSource);
+};
 
 describe('salita', function() {
   describe('basic', function() {
@@ -239,6 +249,71 @@ describe('salita', function() {
           quiet: true,
         }).then((obj) => {
           expect(obj).toMatchSnapshot();
+          done();
+        });
+      });
+    });
+  });
+
+  describe('update', function() {
+    it('should write to the file', function() {
+      expect.assertions(2);
+
+      /* eslint-disable-next-line promise/param-names */
+      return new Promise((done) => {
+        resetTemp();
+
+        return salita('__tests__/files/temp', {
+          dryRun: false,
+          update: true,
+          quiet: true,
+        }).then((obj) => {
+          expect(obj).toMatchSnapshot();
+          const pkg = fs.readFileSync('__tests__/files/temp/package.json', 'utf8');
+          resetTemp();
+          expect(pkg).toMatchSnapshot();
+          done();
+        });
+      });
+    });
+  });
+
+  describe('invalid', function() {
+    it('unknown package and version number', function() {
+      expect.assertions(2);
+
+      /* eslint-disable-next-line promise/param-names */
+      return new Promise((done) => {
+        let stdout = '';
+        const temp = process.stdout.write;
+        process.stdout.write = function(value) {
+          stdout += value;
+        };
+
+        return salita('__tests__/files/invalid', {color: false}).then((pkg) => {
+          process.stdout.write = temp;
+          expect(stdout).toMatchSnapshot();
+          expect(pkg).toMatchSnapshot();
+          done();
+        });
+      });
+    });
+
+    it('unknown package and version number when pegged', function() {
+      expect.assertions(2);
+
+      /* eslint-disable-next-line promise/param-names */
+      return new Promise((done) => {
+        let stdout = '';
+        const temp = process.stdout.write;
+        process.stdout.write = function(value) {
+          stdout += value;
+        };
+
+        return salita('__tests__/files/invalid', {color: false, ignorePegged: true}).then((pkg) => {
+          process.stdout.write = temp;
+          expect(stdout).toMatchSnapshot();
+          expect(pkg).toMatchSnapshot();
           done();
         });
       });

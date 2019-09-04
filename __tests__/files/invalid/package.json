@@ -1,0 +1,8 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "dependencies": {
+    "no-known-package-1": "1.0.0",
+    "json3": "-1"
+  }
+}

@@ -63,6 +63,72 @@ JSONData {
 }
 `;
 
+exports[`salita invalid unknown package and version number 1`] = `
+"Found: __tests__/files/invalid/package.json
+Dependencies:
+ Requested range not satisfied by:   json3               from  -1     to  ^3.3.3 
+ Package not found:                  no-known-package-1  at    1.0.0  ?  
+Development Dependencies:
+ None found 
+Peer Dependencies:
+ None found 
+
+0 updated out of 2 total dependencies.
+
+"
+`;
+
+exports[`salita invalid unknown package and version number 2`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "-1",
+      "no-known-package-1": "1.0.0",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/invalid/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita invalid unknown package and version number when pegged 1`] = `
+"Found: __tests__/files/invalid/package.json
+Dependencies:
+ Kept:   json3               at  -1    
+ Kept:   no-known-package-1  at  1.0.0 
+Development Dependencies:
+ None found 
+Peer Dependencies:
+ None found 
+
+0 updated out of 2 total dependencies.
+
+"
+`;
+
+exports[`salita invalid unknown package and version number when pegged 2`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "-1",
+      "no-known-package-1": "1.0.0",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/invalid/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
 exports[`salita sections should work with duplicate sections 1`] = `
 JSONData {
   "data": Object {
@@ -167,6 +233,46 @@ Peer Dependencies:
 
 3 updated out of 3 total dependencies.
 
+"
+`;
+
+exports[`salita update should write to the file 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "safe-to-string-x": "^2.0.3",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "jquery-ui": "^1.12.1",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/temp/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita update should write to the file 2`] = `
+"{
+  \\"name\\": \\"tests\\",
+  \\"version\\": \\"1.0.0\\",
+  \\"dependencies\\": {
+    \\"json3\\": \\"^3.3.3\\"
+  },
+  \\"devDependencies\\": {
+    \\"safe-to-string-x\\": \\"^2.0.3\\"
+  },
+  \\"peerDependencies\\": {
+    \\"jquery-ui\\": \\"^1.12.1\\"
+  }
+}
 "
 `;
 
