@@ -1,0 +1,1227 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`salita basic it has correct sections 1`] = `
+Array [
+  "dep",
+  "dev",
+  "peer",
+]
+`;
+
+exports[`salita basic it throws if path is not a string 1`] = `"Path must be a string. Received undefined"`;
+
+exports[`salita check should return sums 1`] = `
+Object {
+  "changed": 3,
+  "total": 3,
+}
+`;
+
+exports[`salita ignore pegged 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "*",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita ignore stars 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "*",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita sections should work with duplicate sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "*",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita sections should work with invalid sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "*",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita stdout it emits json 1`] = `
+"{
+  \\"dependencies\\": [
+    {
+      \\"after\\": \\"^3.3.3\\",
+      \\"before\\": \\"^3.1.0\\",
+      \\"isChanged\\": true,
+      \\"isUpdatable\\": true,
+      \\"name\\": \\"json3\\"
+    }
+  ],
+  \\"devDependencies\\": [
+    {
+      \\"after\\": \\"^3.3.3\\",
+      \\"before\\": \\"3.1.0\\",
+      \\"isChanged\\": true,
+      \\"isUpdatable\\": true,
+      \\"name\\": \\"json3\\"
+    }
+  ],
+  \\"peerDependencies\\": [
+    {
+      \\"after\\": \\"^3.3.3\\",
+      \\"before\\": \\"*\\",
+      \\"isChanged\\": true,
+      \\"isUpdatable\\": true,
+      \\"name\\": \\"json3\\"
+    }
+  ]
+}
+"
+`;
+
+exports[`salita stdout it emits with color 1`] = `
+"Found: __tests__/files/all-deps/package.json
+[32m[4mDependencies:[24m[39m
+ [32mChanged: [39m  json3  from  [33m^3.1.0[39m  to  [33m^3.3.3[39m 
+[32m[4mDevelopment Dependencies:[24m[39m
+ [32mChanged: [39m  json3  from  [33m3.1.0[39m  to  [33m^3.3.3[39m 
+[32m[4mPeer Dependencies:[24m[39m
+ [32mChanged: [39m  json3  from  [33m*[39m  to  [33m^3.3.3[39m 
+
+3 updated out of 3 total dependencies.
+
+"
+`;
+
+exports[`salita stdout it emits without color 1`] = `
+"Found: __tests__/files/all-deps/package.json
+Dependencies:
+ Changed:   json3  from  ^3.1.0  to  ^3.3.3 
+Development Dependencies:
+ Changed:   json3  from  3.1.0  to  ^3.3.3 
+Peer Dependencies:
+ Changed:   json3  from  *  to  ^3.3.3 
+
+3 updated out of 3 total dependencies.
+
+"
+`;
+
+exports[`salita with "" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[]" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.1.0",
+    },
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "*",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[]" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[]" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[]" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[]" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,dev,peer]" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,dev,peer]" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,dev,peer]" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,dev,peer]" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,dev,peer]" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,dev]" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "*",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,dev]" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,dev]" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,dev]" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,dev]" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,peer]" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,peer]" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,peer]" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,peer]" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep,peer]" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep]" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "*",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep]" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep]" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep]" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dep]" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dev,peer]" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.1.0",
+    },
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dev,peer]" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dev,peer]" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dev,peer]" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dev,peer]" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dev]" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.1.0",
+    },
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "*",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dev]" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dev]" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dev]" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[dev]" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[peer]" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.1.0",
+    },
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[peer]" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[peer]" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "3.1.0",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[peer]" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "[peer]" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "null" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "null" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "null" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "null" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "null" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "true" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "true" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "true" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "true" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "true" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "undefined" section options enabled should work with all sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/all-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "undefined" section options enabled should work with dep sections 1`] = `
+JSONData {
+  "data": Object {
+    "dependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dep/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "undefined" section options enabled should work with dev sections 1`] = `
+JSONData {
+  "data": Object {
+    "devDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/dev/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "undefined" section options enabled should work with no sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/no-deps/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;
+
+exports[`salita with "undefined" section options enabled should work with peer sections 1`] = `
+JSONData {
+  "data": Object {
+    "name": "tests",
+    "peerDependencies": Object {
+      "json3": "^3.3.3",
+    },
+    "version": "1.0.0",
+  },
+  "filename": "__tests__/files/peer/package.json",
+  "format": Object {
+    "indent": "  ",
+    "trailing": false,
+  },
+}
+`;

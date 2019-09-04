@@ -1,0 +1,7 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "peerDependencies": {
+    "json3": "3.1.0"
+  }
+}

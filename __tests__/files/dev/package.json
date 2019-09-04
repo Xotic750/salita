@@ -1,0 +1,7 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "devDependencies": {
+    "json3": "3.1.0"
+  }
+}

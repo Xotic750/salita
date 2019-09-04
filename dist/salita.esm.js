@@ -14,17 +14,13 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var path = require('path');
-
-var npm = require('npm');
-
-var jsonFilePlus = require('json-file-plus');
-
-var Table = require('cli-table');
-
-var chalk = require('chalk');
-
-var semver = require('semver');
+import path from 'path';
+import npm from 'npm';
+import jsonFilePlus from 'json-file-plus';
+import Table from 'cli-table';
+import chalk from 'chalk';
+import semver from 'semver';
+import view from 'npm/lib/view';
 /**
  * @typedef {object} PackagePlus
  * @property {object} data
@@ -36,6 +32,20 @@ var semver = require('semver');
  * @property {Function} save
  */
 
+/**
+ * @typedef {object} DepSubObject
+ * @property {string} section
+ * @property {string} title
+ */
+
+/**
+ * @typedef {object} DepObject
+ * @property {DepSubObject} dependencies
+ * @property {DepSubObject} devDependencies
+ * @property {DepSubObject} peerDependencies
+ */
+
+/** @type {DepObject} */
 
 var deps = {
   dependencies: {
@@ -51,7 +61,11 @@ var deps = {
     title: 'Peer Dependencies'
   }
 };
+/** @type {Array<string>} */
+
 var depsKeys = Object.keys(deps);
+/** @type {Array<string>} */
+
 var depsSections = depsKeys.map(function iteratee(key) {
   return deps[key].section;
 });
@@ -238,18 +252,16 @@ var assertLatestLength = function assertLatestLength(latest) {
 
 
 var lookupDistTags = function lookupDistTags(name, callback) {
-  /*  Need to require here, because NPM does all sorts of funky global attaching. */
+  /* Need to require here, because NPM does all sorts of funky global attaching. */
+  //* eslint-disable-next-line global-require */
+  // const view = require('npm/lib/view');
 
-  /* eslint-disable-next-line global-require */
-  var view = require('npm/lib/view');
-
-  var prefix = npm.config.get('save-prefix');
   /* Call View directly to ensure the arguments actually work. */
-
   view([name, 'dist-tags'], true, function cb(err, desc) {
     if (err) {
       callback(err, {});
     } else {
+      var prefix = npm.config.get('save-prefix');
       var latest = assertLatestLength(Object.keys(desc));
       var tags = desc[latest]['dist-tags'];
       callback(null, {
@@ -583,10 +595,11 @@ var getDepPromises = function getDepPromises(packagePlus, options) {
 
 
 var createFoundPackageJsonLogger = function createFoundPackageJsonLogger(options) {
-  var json = options.json;
+  var json = options.json,
+      quiet = options.quiet;
   return function foundPackageJsonLogger(packagePlus) {
-    if (packagePlus && !json) {
-      console.log('Found package.json.');
+    if (packagePlus && !json && !quiet) {
+      process.stdout.write("Found: ".concat(packagePlus.filename, "\n"));
     }
 
     return packagePlus;
@@ -599,22 +612,26 @@ var createFoundPackageJsonLogger = function createFoundPackageJsonLogger(options
 
 var printEach = function printEach(results) {
   results.map(String).forEach(function innerIteratee(result) {
-    console.log(result);
+    process.stdout.write("".concat(result, "\n"));
   });
 };
 /**
  * @param {DepPromises} depPromises - The object of promise arrays.
- * @param {boolean} json - To print JSON or not.
+ * @param {object} options - The user options.
  * @returns {function(Array): DepPromises} The depPromises object.
  */
 
 
-var createPrinter = function createPrinter(depPromises, json) {
+var createPrinter = function createPrinter(depPromises, options) {
+  var json = options.json,
+      quiet = options.quiet;
   return function printer(depResults) {
-    if (json) {
-      console.log(JSON.stringify(Object.assign.apply(null, [{}].concat(depResults)), null, 2));
-    } else {
-      depResults.forEach(printEach);
+    if (!quiet) {
+      if (json) {
+        process.stdout.write("".concat(JSON.stringify(Object.assign.apply(null, [{}].concat(depResults)), null, 2), "\n"));
+      } else {
+        depResults.forEach(printEach);
+      }
     }
 
     return depPromises;
@@ -637,7 +654,7 @@ var createPromiseAllPromises = function createPromiseAllPromises(options) {
     var depPromises = getDepPromises(packagePlus, options);
     /* Wait for all of them to resolve. */
 
-    return Promise.all(depPromises.promises).then(createPrinter(depPromises, options.json)).then(function thenee() {
+    return Promise.all(depPromises.promises).then(createPrinter(depPromises, options)).then(function thenee() {
       return {
         packagePlus: packagePlus,
         depPromises: depPromises
@@ -680,7 +697,8 @@ var countIteratee = function countIteratee(acc, category) {
 
 var createCountAndSave = function createCountAndSave(options) {
   var check = options.check,
-      json = options.json;
+      json = options.json,
+      quiet = options.quiet;
   return function countAndSave(_ref9) {
     var packagePlus = _ref9.packagePlus,
         depPromises = _ref9.depPromises;
@@ -690,8 +708,8 @@ var createCountAndSave = function createCountAndSave(options) {
         total: 0
       });
 
-      if (!json) {
-        console.log("\n".concat(sums.changed, " updated out of ").concat(sums.total, " total dependencies."));
+      if (!json && !quiet) {
+        process.stdout.write("\n".concat(sums.changed, " updated out of ").concat(sums.total, " total dependencies.\n\n"));
       }
 
       if (check) {
@@ -705,6 +723,90 @@ var createCountAndSave = function createCountAndSave(options) {
   };
 };
 /**
+ * @typedef {object} UserOptions
+ * @property {boolean} color - Default true.
+ * @property {boolean} json - Default false.
+ * @property {boolean} dryRun - Default true.
+ * @property {boolean} update - Default false.
+ * @property {boolean} onlyChanged - Default false.
+ * @property {boolean} check - Default false.
+ * @property {Array<string>} sections - Default ['dep','dev','peer].
+ * @property {boolean} quiet - Default false.
+ * @property {boolean} ignorePegged - Default false.
+ * @property {boolean} ignoreStars - Default false.
+ */
+
+/**
+ * @returns {UserOptions} - The default values.
+ */
+
+
+var defaultOptions = function defaultOptions() {
+  return {
+    color: true,
+    json: false,
+    dryRun: true,
+    update: false,
+    onlyChanged: false,
+    check: false,
+    sections: depsSections,
+    quiet: false,
+    ignorePegged: false,
+    ignoreStars: false
+  };
+};
+/**
+ * @param {Array} optionValue - The user option value.
+ * @param {Array} defaultValue - The default value.
+ * @returns {Array} The normalize value.
+ */
+
+
+var normalizeSections = function normalizeSections(optionValue, defaultValue) {
+  return optionValue.reduce(function iteratee(acc, item) {
+    if (acc.indexOf(item) === -1 && defaultValue.indexOf(item) !== -1) {
+      acc.push(item);
+    }
+
+    return acc;
+  }, []);
+};
+/**
+ * @param {UserOptions} opts - The default options.
+ * @param {UserOptions} options - The user options.
+ */
+
+
+var normalizeValues = function normalizeValues(opts, options) {
+  Object.keys(opts).forEach(function iteratee(key) {
+    var defaultValue = opts[key];
+    var optionValue = options[key];
+
+    if (key === 'sections') {
+      if (Array.isArray(optionValue)) {
+        opts[key] = normalizeSections(optionValue, defaultValue);
+      }
+    } else if (typeof optionValue === 'boolean') {
+      opts[key] = optionValue;
+    }
+  });
+};
+/**
+ * @param {UserOptions} options - The user options.
+ * @returns {UserOptions} Defaults merged with user options.
+ */
+
+
+var normalizeOptions = function normalizeOptions(options) {
+  var opts = defaultOptions();
+
+  if (_typeof(options) === 'object' && options) {
+    normalizeValues(opts, options);
+  }
+
+  return opts;
+};
+/**
  * The main entry point.
  *
  * @param {string} dir - The working directory.
@@ -714,11 +816,13 @@ var createCountAndSave = function createCountAndSave(options) {
 
 
 var salita = function salita(dir, options) {
+  var opts = normalizeOptions(options);
+  chalk.enabled = opts.color && !opts.json;
   var filename = path.join(dir, 'package.json');
   /** @type {Promise<object>} */
 
   var packagePlus = jsonFilePlus(filename);
-  return packagePlus.then(loadNPM).then(createFoundPackageJsonLogger(options)).then(createPromiseAllPromises(options)).then(createCountAndSave(options));
+  return Promise.resolve(packagePlus).then(loadNPM).then(createFoundPackageJsonLogger(opts)).then(createPromiseAllPromises(opts)).then(createCountAndSave(opts));
 };
 
 Object.defineProperty(salita, 'sections', {
@@ -727,6 +831,6 @@ Object.defineProperty(salita, 'sections', {
     return depsSections.slice();
   }
 });
-module.exports = salita;
+export default salita;
 
 //# sourceMappingURL=salita.esm.js.map

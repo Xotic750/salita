@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const yargs = require('yargs');
-const salita = require('../dist/salita');
+const salita = require('../dist/salita').default;
 const PACKAGE = require('../package');
 
 const FALSE = Object(false);
@@ -34,7 +34,7 @@ const hasDuplicates = function hasDuplicates(arr) {
 
 const hasUnsupported = function hasUnsupported(args) {
   return args.some(function predicate(arg) {
-    return salita.sections.indexOf(arg) === -1;
+    return args.indexOf(arg) === -1;
   });
 };
 
@@ -62,6 +62,10 @@ const options = yargs
   .describe('only-changed', 'only show packages that have (or would have) changed')
   .default('only-changed', FALSE)
   .alias('only-changed', 'o')
+  .boolean('quiet')
+  .describe('quiet', 'do not print information')
+  .default('quiet', FALSE)
+  .alias('quiet', 'q')
   .boolean('check')
   .describe(
     'check',

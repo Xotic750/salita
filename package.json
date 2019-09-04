@@ -39,6 +39,7 @@
     "security": "npm audit",
     "security-fix": "npm run security -- fix",
     "start": "nodemon --exec \"npm run build\" --watch src",
+    "test": "npm run clean:coverage && npm run build && jest",
     "test:ci": "npm run test -- --ci --maxWorkers=2",
     "test:ci-coveralls": "npm run test:ci -- --coverage --coverageReporters=text-lcov | coveralls",
     "test:coverage": "npm run test -- --coverage"
@@ -46,16 +47,16 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Xotic750/replace-x.git"
+    "url": "https://github.com/Xotic750/salita.git"
   },
   "bugs": {
-    "url": "https://github.com/Xotic750/replace-x/issues"
+    "url": "https://github.com/Xotic750/salita/issues"
   },
   "dependencies": {
     "chalk": "^2.4.2",
     "cli-table": "^0.3.1",
     "json-file-plus": "^3.3.1",
-    "npm": "^6.11.2",
+    "npm": "=6.5.0",
     "semver": "^6.3.0",
     "yargs": "^14.0.0"
   },
@@ -105,6 +106,7 @@
     "lodash-webpack-plugin": "^0.11.5",
     "mkdirp": "^0.5.1",
     "nodemon": "^1.19.1",
+    "power-set-x": "^2.1.2",
     "prettier": "^1.18.2",
     "rimraf": "^3.0.0",
     "source-map-loader": "^0.2.4",
