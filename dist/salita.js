@@ -834,6 +834,10 @@ var normalizeOptions = function normalizeOptions(options) {
 
 
 var salita = function salita(dir, options) {
+  if (typeof dir !== 'string') {
+    throw new TypeError("Path must be a string. Received ".concat(dir));
+  }
+
   var opts = normalizeOptions(options);
   _chalk["default"].enabled = opts.color && !opts.json;
 

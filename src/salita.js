@@ -674,6 +674,10 @@ const normalizeOptions = function normalizeOptions(options) {
  * @returns {Promise<(TotalsObject|PackagePlus)>} The packagePlus promise.
  */
 const salita = function salita(dir, options) {
+  if (typeof dir !== 'string') {
+    throw new TypeError(`Path must be a string. Received ${dir}`);
+  }
+
   const opts = normalizeOptions(options);
   chalk.enabled = opts.color && !opts.json;
   const filename = path.join(dir, 'package.json');

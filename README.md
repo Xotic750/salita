@@ -68,6 +68,7 @@ salita
 - `--check`: implies "dry-run"; and returns with an exit code matching the number of updated dependencies.
 - `--sections`: comma-separated list of sections to process, default: dep dev peer opt
 - `--only-changed`: only show packages that have (or would have) changed
+- `--quiet`: do not print information
 
 ### Example
 
