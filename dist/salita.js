@@ -17,8 +17,6 @@ var _chalk = _interopRequireDefault(require("chalk"));
 
 var _semver = _interopRequireDefault(require("semver"));
 
-var _view = _interopRequireDefault(require("npm/lib/view"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -270,11 +268,13 @@ var assertLatestLength = function assertLatestLength(latest) {
 
 var lookupDistTags = function lookupDistTags(name, callback) {
   /* Need to require here, because NPM does all sorts of funky global attaching. */
-  //* eslint-disable-next-line global-require */
-  // const view = require('npm/lib/view');
 
+  /* eslint-disable-next-line global-require */
+  var view = require('npm/lib/view');
   /* Call View directly to ensure the arguments actually work. */
-  (0, _view["default"])([name, 'dist-tags'], true, function cb(err, desc) {
+
+
+  view([name, 'dist-tags'], true, function cb(err, desc) {
     if (err) {
       callback(err, {});
     } else {

@@ -12,8 +12,8 @@ exports[`salita basic it throws if path is not a string 1`] = `"Path must be a s
 
 exports[`salita check should return sums 1`] = `
 Object {
-  "changed": 3,
-  "total": 3,
+  "changed": 4,
+  "total": 4,
 }
 `;
 
@@ -29,6 +29,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "*",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },
@@ -52,6 +53,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "*",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },
@@ -141,6 +143,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "*",
+      "safe-to-string-x": "^1 || ^2",
     },
     "version": "1.0.0",
   },
@@ -164,6 +167,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "*",
+      "safe-to-string-x": "^1 || ^2",
     },
     "version": "1.0.0",
   },
@@ -202,6 +206,13 @@ exports[`salita stdout it emits json 1`] = `
       \\"isChanged\\": true,
       \\"isUpdatable\\": true,
       \\"name\\": \\"jquery-ui\\"
+    },
+    {
+      \\"after\\": \\"^2.0.3\\",
+      \\"before\\": \\"^1 || ^2\\",
+      \\"isChanged\\": true,
+      \\"isUpdatable\\": true,
+      \\"name\\": \\"safe-to-string-x\\"
     }
   ]
 }
@@ -215,9 +226,10 @@ exports[`salita stdout it emits with color 1`] = `
 [32m[4mDevelopment Dependencies:[24m[39m
  [32mChanged: [39m  safe-to-string-x  from  [33m1.5.0[39m  to  [33m^2.0.3[39m 
 [32m[4mPeer Dependencies:[24m[39m
- [32mChanged: [39m  jquery-ui  from  [33m*[39m  to  [33m^1.12.1[39m 
+ [32mChanged: [39m  jquery-ui         from  [33m*[39m         to  [33m^1.12.1[39m 
+ [32mChanged: [39m  safe-to-string-x  from  [33m^1 || ^2[39m  to  [33m^2.0.3[39m  
 
-3 updated out of 3 total dependencies.
+4 updated out of 4 total dependencies.
 
 "
 `;
@@ -229,9 +241,10 @@ Dependencies:
 Development Dependencies:
  Changed:   safe-to-string-x  from  1.5.0  to  ^2.0.3 
 Peer Dependencies:
- Changed:   jquery-ui  from  *  to  ^1.12.1 
+ Changed:   jquery-ui         from  *         to  ^1.12.1 
+ Changed:   safe-to-string-x  from  ^1 || ^2  to  ^2.0.3  
 
-3 updated out of 3 total dependencies.
+4 updated out of 4 total dependencies.
 
 "
 `;
@@ -248,6 +261,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "^1.12.1",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },
@@ -270,7 +284,8 @@ exports[`salita update should write to the file 2`] = `
     \\"safe-to-string-x\\": \\"^2.0.3\\"
   },
   \\"peerDependencies\\": {
-    \\"jquery-ui\\": \\"^1.12.1\\"
+    \\"jquery-ui\\": \\"^1.12.1\\",
+    \\"safe-to-string-x\\": \\"^2.0.3\\"
   }
 }
 "
@@ -288,6 +303,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "^1.12.1",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },
@@ -376,6 +392,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "*",
+      "safe-to-string-x": "^1 || ^2",
     },
     "version": "1.0.0",
   },
@@ -464,6 +481,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "^1.12.1",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },
@@ -552,6 +570,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "*",
+      "safe-to-string-x": "^1 || ^2",
     },
     "version": "1.0.0",
   },
@@ -640,6 +659,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "^1.12.1",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },
@@ -728,6 +748,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "*",
+      "safe-to-string-x": "^1 || ^2",
     },
     "version": "1.0.0",
   },
@@ -816,6 +837,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "^1.12.1",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },
@@ -904,6 +926,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "*",
+      "safe-to-string-x": "^1 || ^2",
     },
     "version": "1.0.0",
   },
@@ -992,6 +1015,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "^1.12.1",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },
@@ -1080,6 +1104,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "^1.12.1",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },
@@ -1168,6 +1193,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "^1.12.1",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },
@@ -1256,6 +1282,7 @@ JSONData {
     "name": "tests",
     "peerDependencies": Object {
       "jquery-ui": "^1.12.1",
+      "safe-to-string-x": "^2.0.3",
     },
     "version": "1.0.0",
   },

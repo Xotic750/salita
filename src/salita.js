@@ -4,7 +4,6 @@ import jsonFilePlus from 'json-file-plus';
 import Table from 'cli-table';
 import chalk from 'chalk';
 import semver from 'semver';
-import view from 'npm/lib/view';
 
 /**
  * @typedef {object} PackagePlus
@@ -224,8 +223,8 @@ const assertLatestLength = function assertLatestLength(latest) {
  */
 const lookupDistTags = function lookupDistTags(name, callback) {
   /* Need to require here, because NPM does all sorts of funky global attaching. */
-  //* eslint-disable-next-line global-require */
-  // const view = require('npm/lib/view');
+  /* eslint-disable-next-line global-require */
+  const view = require('npm/lib/view');
 
   /* Call View directly to ensure the arguments actually work. */
   view([name, 'dist-tags'], true, function cb(err, desc) {
