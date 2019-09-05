@@ -1,6 +1,6 @@
 {
   "name": "@xotic750/salita",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Automatically upgrade all dependencies, devDependencies, and peerDependencies",
   "homepage": "https://github.com/Xotic750/salita",
   "author": {
