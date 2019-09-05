@@ -741,7 +741,7 @@ var createCountAndSave = function createCountAndSave(options) {
         return sums;
       }
 
-      if (!options.dryRun && options.update) {
+      if (!options.dryRun) {
         /* Write back the package.json. */
         packagePlus.saveSync();
       }
@@ -802,8 +802,40 @@ var normalizeSections = function normalizeSections(optionValue, defaultValue) {
   }, []);
 };
 /**
+ * @param {UserOptions} options - The user options.
+ * @returns {UserOptions} The normalized options.
+ */
+
+
+var normalizeDryRun = function normalizeDryRun(options) {
+  if (options.update) {
+    options.dryRun = false;
+  }
+
+  if (options.dryRun || !options.update || options.check) {
+    options.dryRun = true;
+    options.update = false;
+  }
+
+  return options;
+};
+/**
+ * @param {UserOptions} options - The user options.
+ * @returns {UserOptions} The normalized options.
+ */
+
+
+var normalizeColor = function normalizeColor(options) {
+  if (options.json) {
+    options.color = false;
+  }
+
+  return options;
+};
+/**
  * @param {UserOptions} opts - The default options.
  * @param {UserOptions} options - The user options.
+ * @returns {UserOptions} The normalized options.
  */
 
 
@@ -820,6 +852,8 @@ var normalizeValues = function normalizeValues(opts, options) {
       opts[key] = optionValue;
     }
   });
+  normalizeDryRun(opts);
+  return normalizeColor(opts);
 };
 /**
  * @param {UserOptions} options - The user options.

@@ -264,7 +264,6 @@ describe('salita', function() {
         resetTemp();
 
         return salita('__tests__/files/temp', {
-          dryRun: false,
           update: true,
           quiet: true,
         }).then((obj) => {
